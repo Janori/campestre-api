@@ -24,8 +24,8 @@ class MemberController extends Controller
     public function index(){
         $from = Input::get('from', 0);
         $count = Input::get('count', 10);
-        $member = Member::where('tipo', 'T')->take($count)->skip($from)->get()->toArray();
-        $q =  Member::where('tipo', 'T')->count();
+        $member = Member::where('tipo', '<>', 'E')->take($count)->skip($from)->get()->toArray();
+        $q =  Member::where('tipo', '<>', 'E')->count();
         return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
     public function employees(){
@@ -57,8 +57,26 @@ class MemberController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
+        $info = null;
+        $data = null;
+        foreach ($request->all() as $key => $value){
+            if(strtolower($key) === 'info'){
+                $info = new MembersRel($value);
+            }else if(strtolower($key) === 'data'){
+                $data = new MembersData($value);
+            }
+        }
         try {
             $member = Member::create($request->all());   
+            $info->id_member = $member->id;
+            if(! $info->id_ref){
+                $info->id_ref = $member->id;
+            }
+
+            $data->id_member = $member->id;
+
+            $info->save();
+            $data->save();
         } catch (\Exception $e) {
             /*if($e->getCode() == 23000){
                 return response()->json(JResponse::set(false,'El usuario ya existe.'));
