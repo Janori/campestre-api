@@ -25,6 +25,15 @@ Route::group(['middleware' => ['cors']], function(){
 		});
 		Route::group(['prefix'=>'download'], function(){
 		});
+		Route::group(['prefix'=>'employees'], function(){
+			Route::get('', 'MemberController@employees');
+		});
+		Route::group(['prefix'=>'guests'], function(){
+			Route::get('', 'MemberController@guests');
+		});
+		Route::group(['prefix'=>'associates'], function(){
+			Route::get('', 'MemberController@associates');
+		});
 		Route::resource('users', 'UserController');
 		Route::resource('members', 'MemberController');
 	});
