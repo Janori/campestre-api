@@ -24,7 +24,12 @@ class MemberController extends Controller
     public function index(){
         $from = Input::get('from', 0);
         $count = Input::get('count', 10);
-        $member = Member::where('tipo', '<>', 'E')->take($count)->skip($from)->get()->toArray();
+        $w = Input::get('query', '');
+        $member = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
+                $query->where('nombre', 'like', '%' . $w . '%');
+                      //->orWhere('', 'like', '%' . $w . '%');
+            })->take($count)->skip($from)->get()->toArray();
+
         $q =  Member::where('tipo', '<>', 'E')->count();
         return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
@@ -50,6 +55,103 @@ class MemberController extends Controller
         return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);   
     }
 
+    public function deleteFMD($id){
+        if(is_null($id) || !is_numeric($id)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        $member = Member::find($id);
+        if($member->members_rel){
+            $member->members_rel->fmd = '';
+            $member->members_rel->save();
+        }
+        return response()->json(JResponse::set(true, 'Huella eliminada'));
+
+    }
+
+
+    public function unsetRel($idmember){
+        if(is_null($idmember) || !is_numeric($idmember)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        $member = Member::find($idmember);
+        $member->tipo = 'T';
+        if($member->members_rel){
+            $member->members_rel->id_ref = $idmember;
+            $member->members_rel->save();
+        }else{
+            $info = new MembersRel();
+            $info->id_member = $idmember;
+            $info->id_ref = $idmember;
+            $info->pin = '';
+            $info->rfid = '';
+            $info->fmd = '';
+            $info->code = '';
+            $info->save();
+        }
+        $member->save();
+        return response()->json(JResponse::set(true, 'Usuario relacionado correctamente'));
+    }
+
+    public function setRel($idmember, $idref){
+        if(is_null($idmember) || !is_numeric($idmember)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        if(is_null($idref) || !is_numeric($idref)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        $member = Member::find($idmember);
+        if($member->members_rel){
+            $member->members_rel->id_ref = $idref;
+            if($member->members_rel->id_ref == $member->members_rel->id_member){
+                $member->tipo = 'T';
+            }else{
+                $member->tipo = 'A';
+            }
+            $member->members_rel->save();
+            $member->save();
+        }else{
+            $info = new MembersRel();
+            $info->id_member = $idmember;
+            $info->id_ref = $idref;
+            $info->pin = '';
+            $info->rfid = '';
+            $info->fmd = '';
+            $info->code = '';
+            $info->save();
+        }
+        return response()->json(JResponse::set(true, 'Usuario relacionado correctamente'));
+    }
+
+
+    public function relGuest($idmember, $idref){
+        if(is_null($idmember) || !is_numeric($idmember)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        if(is_null($idref) || !is_numeric($idref)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        $member = Member::find($idmember);
+        $ref = Member::find($idref);
+        if($member->tipo === 'I'){
+            $info = new MembersRel();
+            $info->id_member = $idmember;
+            $info->id_ref = $ref->members_rel->id_ref;
+            $info->pin = '';
+            $info->rfid = '';
+            $info->fmd = '';
+            $info->code = '';
+            $info->save();
+            return response()->json(JResponse::set(true, 'Invitado relacionado correctamente'));
+        }else{
+            return response()->json(JResponse::set(false, 'El usuario que se quiere relacionar no es un invitado'));
+        }
+    }
+    public function unrelGuest($idmember, $idref){
+        if(is_null($idmember) || !is_numeric($idmember)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        if(is_null($idref) || !is_numeric($idref)) return response()->json(JResponse::set(false, 'Error en la petición.'));
+        $member = Member::find($idmember);
+        $ref = Member::find($idref);
+        if($member->tipo === 'I'){
+            $rel = MembersRel::where('id_member', $idmember)->where('id_ref', $ref->members_rel->id_ref);
+            if($rel){
+                $rel->delete();
+                return response()->json(JResponse::set(true, 'Referencia removida'));   
+            }else{
+                return response()->json(JResponse::set(false, 'La referencia que se intenta remover no existe'));
+            }
+        }else{
+            return response()->json(JResponse::set(false, 'El usuario al que se quiere remover referencia no es un invitado'));
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -57,8 +159,8 @@ class MemberController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request){
-        $info = null;
-        $data = null;
+        $info = new MembersRel();
+        $data = new MembersData();
         foreach ($request->all() as $key => $value){
             if(strtolower($key) === 'info'){
                 $info = new MembersRel($value);

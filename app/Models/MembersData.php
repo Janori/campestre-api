@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\MembersRel;
 
 class MembersData extends Model{
-    protected $table = 'members_data';
+    protected $table = 'members_data_fixed';
 
     protected $fillable = ['id_member', 'code', 'tipo_membresia', 'direccion', 
                            'rfc', 'fecha_nacimiento', 'tipo_sangre', 'celular', 

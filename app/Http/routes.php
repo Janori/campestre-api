@@ -30,11 +30,16 @@ Route::group(['middleware' => ['cors']], function(){
 		});
 		Route::group(['prefix'=>'guests'], function(){
 			Route::get('', 'MemberController@guests');
+			Route::post('{idmember}/setrel/{idref}', 'MemberController@relGuest');
+			Route::put('{idmember}/unsetrel/{idref}', 'MemberController@unrelGuest');
 		});
 		Route::group(['prefix'=>'associates'], function(){
 			Route::get('', 'MemberController@associates');
 		});
 		Route::resource('users', 'UserController');
+		Route::put('members/{idmember}/setrel/{idref}', 'MemberController@setRel');
+		Route::put('members/{idmember}/unsetrel', 'MemberController@unsetRel');
+		Route::put('members/delfmd/{id}', 'MemberController@deleteFMD');
 		Route::resource('members', 'MemberController');
 	});
 });

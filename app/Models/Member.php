@@ -5,18 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\MembersRel;
+use App\Models\Member;
 
 class Member extends Model{
     protected $table = 'members';
 
     protected $fillable = ['nombre', 'tipo'];
 
-    protected $appends = ['info', 'data'];
+    protected $appends = ['info', 'data', 'assoc'];
 
     protected $hidden = ['members_rel', 'members_data'];
 
     public $timestamps = false;
 
+    public function getAssocAttribute(){
+        if($this->members_rel != null){
+            $mr = MembersRel::where('id_ref', $this->id)->where('id_member','<>',$this->id)->lists('id_member')->toArray();
+            //return $mr;
+            return Member::whereIn('id', $mr)->get();
+        }return null;
+    }
     public function getInfoAttribute(){
     	if($this->members_rel != null){
     		return $this->members_rel;
