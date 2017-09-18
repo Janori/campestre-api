@@ -26,7 +26,10 @@ class MemberController extends Controller
         $count = Input::get('count', 10);
         $w = Input::get('query', '');
         $member = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
-                $query->where('nombre', 'like', '%' . $w . '%');
+                if($w != ''){
+                    $query->where('nombre', 'like', '%' . $w . '%');   
+                    $query->where('tipo', 'T');   
+                }
                       //->orWhere('', 'like', '%' . $w . '%');
             })->take($count)->skip($from)->get()->toArray();
 
