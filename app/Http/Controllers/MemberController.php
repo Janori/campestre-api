@@ -27,8 +27,8 @@ class MemberController extends Controller
         $w = Input::get('query', '');
         $member = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
                 if($w != ''){
-                    $query->where('nombre', 'like', '%' . $w . '%');   
-                    $query->where('tipo', 'T');   
+                    $query->where('nombre', 'like', '%' . $w . '%');
+                    $query->where('tipo', 'T');
                 }
                       //->orWhere('', 'like', '%' . $w . '%');
             })->take($count)->skip($from)->get()->toArray();
@@ -41,21 +41,21 @@ class MemberController extends Controller
         $count = Input::get('count', 10);
         $member = Member::where('tipo', 'E')->take($count)->skip($from)->get()->toArray();
         $q = Member::where('tipo', 'E')->count();
-        return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);   
+        return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
     public function guests(){
         $from = Input::get('from', 0);
         $count = Input::get('count', 10);
         $member = Member::where('tipo', 'I')->take($count)->skip($from)->get()->toArray();
         $q = Member::where('tipo', 'I')->count();
-        return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);   
+        return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
     public function associates(){
         $from = Input::get('from', 0);
         $count = Input::get('count', 10);
         $member = Member::where('tipo', 'A')->take($count)->skip($from)->get()->toArray();
         $q = Member::where('tipo', 'A')->count();
-        return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);   
+        return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
 
     public function deleteFMD($id){
@@ -146,7 +146,7 @@ class MemberController extends Controller
             $rel = MembersRel::where('id_member', $idmember)->where('id_ref', $ref->members_rel->id_ref);
             if($rel){
                 $rel->delete();
-                return response()->json(JResponse::set(true, 'Referencia removida'));   
+                return response()->json(JResponse::set(true, 'Referencia removida'));
             }else{
                 return response()->json(JResponse::set(false, 'La referencia que se intenta remover no existe'));
             }
@@ -172,7 +172,7 @@ class MemberController extends Controller
             }
         }
         try {
-            $member = Member::create($request->all());   
+            $member = Member::create($request->all());
             $info->id_member = $member->id;
             if(! $info->id_ref){
                 $info->id_ref = $member->id;
@@ -197,9 +197,8 @@ class MemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
+    public function show($id) {
+        return response()->json(JResponse::set(true, null, Member::find($id)));
     }
 
     /**
@@ -236,7 +235,7 @@ class MemberController extends Controller
                 $info2 = $member->members_rel;
                 foreach ($info as $key => $value)
                     if(!is_null($value))
-                        $info2->{$key} = $value;    
+                        $info2->{$key} = $value;
                 $info = $info2;
             }
             $info->id_member = $member->id;
@@ -248,18 +247,18 @@ class MemberController extends Controller
                 $data2 = $member->members_data;
                 foreach ($data as $key => $value)
                     if(!is_null($value))
-                        $data2->{$key} = $value; 
-                $data = $data2;   
+                        $data2->{$key} = $value;
+                $data = $data2;
             }
             $data->id_member = $member->id;
         }
         try{
-            $member->save();   
+            $member->save();
             if(!is_null($data)){
-                $data->save();   
+                $data->save();
             }
             if(!is_null($info)){
-                $info->save(); 
+                $info->save();
             }
             return JResponse::set(true, 'obj', $member->toArray());
         }catch(\Exception $e){

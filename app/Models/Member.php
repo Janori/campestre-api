@@ -12,11 +12,21 @@ class Member extends Model{
 
     protected $fillable = ['nombre', 'tipo'];
 
-    protected $appends = ['info', 'data', 'assoc'];
+    protected $appends = ['info', 'data', 'assoc', 'father'];
 
     protected $hidden = ['members_rel', 'members_data'];
 
     public $timestamps = false;
+
+    public function getFatherAttribute() {
+        if($this->members_rel != null) {
+            if($this->tipo == 'A') {
+                return MembersRel::where('id_member', $this->id)->first()->id_ref;
+            }
+        }
+
+        return null;
+    }
 
     public function getAssocAttribute(){
         if($this->members_rel != null){
@@ -30,7 +40,7 @@ class Member extends Model{
     		return $this->members_rel;
     	}return null;
     }
-    public function getDataAttribute(){ 
+    public function getDataAttribute(){
         return $this->members_data;
         if($this->members_data != null){
             return $this->members_data;
