@@ -41,7 +41,7 @@ Route::group(['middleware' => ['cors']], function(){
 		Route::put('members/{idmember}/setrel/{idref}', 'MemberController@setRel');
 		Route::put('members/{idmember}/unsetrel', 'MemberController@unsetRel');
 		Route::put('members/delfmd/{id}', 'MemberController@deleteFMD');
-		Route::get('members/{id}/historial', 'MemberController@historial');
+		Route::get('members/{id}/historial', 'MemberController@lastPayment');
 		Route::post('members/paymonth', 'MemberController@payMonth');
 		Route::resource('members', 'MemberController');
 	});

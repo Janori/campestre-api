@@ -12,7 +12,7 @@ use App\Helpers\JResponse;
 use App\Models\Member;
 use App\Models\MembersData;
 use App\Models\MembersRel;
-use App\Models\MembersHistorial;
+use App\Models\MembersPagos;
 
 use Input;
 
@@ -279,13 +279,13 @@ class MemberController extends Controller
         //
     }
 
-    public function historial($id) {
-        $historial = MembersHistorial::where('member_id', $id)
-                                     ->orderBy('date', 'desc')
-                                     ->take(3)
-                                     ->get();
+    public function lastPayment($id) {
 
-        return response()->json(JResponse::set(true, null, $historial->toArray()));
+        $lastPayment = MembersPagos::where('member_id', $id)
+                                    ->orderBy('id', 'desc')
+                                    ->first();
+
+        return response()->json(JResponse::set(true, null, $lastPayment->toArray()));
     }
 
     public function debtors() {
@@ -315,40 +315,14 @@ class MemberController extends Controller
     }
 
     public function payMonth(Request $request) {
-        dd($request);
-    }
+        try {
+            $payment = MembersPagos::create($request->all());
 
-    private function _registerMemberHistorial() {
-        $members = Member::where('tipo', 'T')->get();
+            return response()->json(JResponse::set(true, 'Pago resgistrado con éxito', $payment->toArray()));
 
-        foreach ($members as $member) {
-            if(!isset($member->members_data)) // IDK wihy some members doesn't have a member_data
-                continue;
-
-            if($member->members_data->status == 'ACTIVO') {
-                MembersHistorial::create([
-                    'member_id' => $member->id,
-                    'month'     => '2017-09',
-                    'date'      => '2017-09-01 00:00:00'
-                ]);
-                MembersHistorial::create([
-                    'member_id' => $member->id,
-                    'month'     => '2017-08',
-                    'date'      => '2017-08-01 00:00:00'
-                ]);
-                MembersHistorial::create([
-                    'member_id' => $member->id,
-                    'month'     => '2017-07',
-                    'date'      => '2017-07-01 00:00:00'
-                ]);
-
-            }
-            else
-                MembersHistorial::create([
-                    'member_id' => $member->id,
-                    'month'     => '2017-06',
-                    'date'      => '2017-06-01 00:00:00'
-                ]);
+        } catch(\Exception $e) {
+            return response()->json(JResponse::set(false, $e->getMessage));
         }
     }
+
 }
