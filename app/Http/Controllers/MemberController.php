@@ -314,6 +314,10 @@ class MemberController extends Controller
         return response()->json(JResponse::set(true, "Se ha actualizado $debtors deudores"));
     }
 
+    public function payMonth(Request $request) {
+        dd($request);
+    }
+
     private function _registerMemberHistorial() {
         $members = Member::where('tipo', 'T')->get();
 

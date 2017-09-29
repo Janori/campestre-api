@@ -21,7 +21,12 @@ class Member extends Model{
     public function getFatherAttribute() {
         if($this->members_rel != null) {
             if($this->tipo == 'A') {
-                return MembersRel::where('id_member', $this->id)->first()->id_ref;
+                $rel = MembersRel::where('id_member', $this->id)->where('id_ref', '<>', $this->id)->first();
+
+                if(!is_null($rel))
+                    return $rel->id_ref;
+                else
+                    return null;
             }
         }
 
