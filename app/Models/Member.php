@@ -58,4 +58,8 @@ class Member extends Model{
         return $this->belongsTo('App\Models\MembersData', 'id', 'id_member');
     }
 
+    public function members_historial() {
+        return $this->hasMany('App\Models\MembersHistorial', 'member_id', 'id');
+    }
+
 }

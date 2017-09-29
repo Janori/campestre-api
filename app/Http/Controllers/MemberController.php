@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,7 @@ use App\Helpers\JResponse;
 use App\Models\Member;
 use App\Models\MembersData;
 use App\Models\MembersRel;
+use App\Models\MembersHistorial;
 
 use Input;
 
@@ -275,5 +277,74 @@ class MemberController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function historial($id) {
+        $historial = MembersHistorial::where('member_id', $id)
+                                     ->orderBy('date', 'desc')
+                                     ->take(3)
+                                     ->get();
+
+        return response()->json(JResponse::set(true, null, $historial->toArray()));
+    }
+
+    public function debtors() {
+        // $this->_registerMemberHistorial(); die;// This
+
+        $debtors = 0;
+        $members = Member::where('tipo', 'T')->get();
+
+        foreach ($members as $member) {
+            if(!isset($member->members_data) || $member->members_data->status != 'ACTIVO') // IDK wihy some members doesn't have a member_data
+                continue;
+
+            $lastPayment = MembersHistorial::where('member_id', $member->id)
+                              ->orderBy('date', 'desc')
+                              ->first();
+
+            if($lastPayment->month != date('Y-m')) {
+                $debtors++;
+
+                DB::table(with(new MembersData)->getTable())
+                    ->where('id_member', $member->id)
+                    ->update(['status' => 'DEUDOR']);
+            }
+        }
+
+        return response()->json(JResponse::set(true, "Se ha actualizado $debtors deudores"));
+    }
+
+    private function _registerMemberHistorial() {
+        $members = Member::where('tipo', 'T')->get();
+
+        foreach ($members as $member) {
+            if(!isset($member->members_data)) // IDK wihy some members doesn't have a member_data
+                continue;
+
+            if($member->members_data->status == 'ACTIVO') {
+                MembersHistorial::create([
+                    'member_id' => $member->id,
+                    'month'     => '2017-09',
+                    'date'      => '2017-09-01 00:00:00'
+                ]);
+                MembersHistorial::create([
+                    'member_id' => $member->id,
+                    'month'     => '2017-08',
+                    'date'      => '2017-08-01 00:00:00'
+                ]);
+                MembersHistorial::create([
+                    'member_id' => $member->id,
+                    'month'     => '2017-07',
+                    'date'      => '2017-07-01 00:00:00'
+                ]);
+
+            }
+            else
+                MembersHistorial::create([
+                    'member_id' => $member->id,
+                    'month'     => '2017-06',
+                    'date'      => '2017-06-01 00:00:00'
+                ]);
+        }
     }
 }

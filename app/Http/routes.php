@@ -19,7 +19,8 @@
 Route::group(['middleware' => ['cors']], function(){
 
 	Route::post('authenticate', 'AuthenticateController@authenticate');
-	Route::get('users/loggedin', 'AuthenticateController@isLogged');	
+	Route::get('users/loggedin', 'AuthenticateController@isLogged');
+	Route::get('debtors', 'MemberController@debtors');
 	Route::group(['middleware' => ['jwt.auth']], function(){
 		Route::group(['prefix'=>'search'], function(){
 		});
@@ -40,6 +41,7 @@ Route::group(['middleware' => ['cors']], function(){
 		Route::put('members/{idmember}/setrel/{idref}', 'MemberController@setRel');
 		Route::put('members/{idmember}/unsetrel', 'MemberController@unsetRel');
 		Route::put('members/delfmd/{id}', 'MemberController@deleteFMD');
+		Route::get('members/{id}/historial', 'MemberController@historial');
 		Route::resource('members', 'MemberController');
 	});
 });
