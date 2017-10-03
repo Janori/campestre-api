@@ -116,7 +116,9 @@ class MemberController extends Controller
             $info->code = '';
             $info->save();
         }
-        return response()->json(JResponse::set(true, 'Usuario relacionado correctamente'));
+
+        $referencedMemeber = Member::find($idref);
+        return response()->json(JResponse::set(true, 'Usuario relacionado correctamente', $referencedMemeber ? $referencedMemeber->toArray() : null));
     }
 
 
@@ -134,7 +136,7 @@ class MemberController extends Controller
             $info->fmd = '';
             $info->code = '';
             $info->save();
-            return response()->json(JResponse::set(true, 'Invitado relacionado correctamente'));
+            return response()->json(JResponse::set(true, 'Invitado relacionado correctamente', $ref->toArray()));
         }else{
             return response()->json(JResponse::set(false, 'El usuario que se quiere relacionar no es un invitado'));
         }
@@ -284,6 +286,8 @@ class MemberController extends Controller
         $lastPayment = MembersPagos::where('member_id', $id)
                                     ->orderBy('id', 'desc')
                                     ->first();
+        if(is_null($lastPayment))
+            return response()->json(JResponse::set(true, null, []));
 
         return response()->json(JResponse::set(true, null, $lastPayment->toArray()));
     }
@@ -321,7 +325,25 @@ class MemberController extends Controller
             return response()->json(JResponse::set(true, 'Pago resgistrado con éxito', $payment->toArray()));
 
         } catch(\Exception $e) {
-            return response()->json(JResponse::set(false, $e->getMessage));
+            return response()->json(JResponse::set(false, $e->getMessage()));
+        }
+    }
+
+    public function getHosts($idmember) {
+        try {
+            $member = Member::find($idmember);
+
+
+            $hosts = Member::whereIn('id', function($query) use ($member) {
+                $query->select('id_ref')
+                      ->from(with(new MembersRel)->getTable())
+                      ->where('id_member', $member->id)
+                      ->where('id_ref', '<>', $member->id);
+            })->get();
+
+            return response()->json(JResponse::set(true, null, $hosts->toArray()));
+        } catch(\Exception $e) {
+            return response()->json(JResponse::set(false, $e->getMessage()));
         }
     }
 
