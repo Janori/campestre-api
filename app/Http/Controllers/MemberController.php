@@ -286,10 +286,17 @@ class MemberController extends Controller
         $lastPayment = MembersPagos::where('member_id', $id)
                                     ->orderBy('id', 'desc')
                                     ->first();
+
         if(is_null($lastPayment))
             return response()->json(JResponse::set(true, null, []));
 
-        return response()->json(JResponse::set(true, null, $lastPayment->toArray()));
+        $lastDay = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        $response = [
+            'paid_up'       => $lastPayment['year'] . '-' . str_pad($lastPayment['month'], 2, "0", STR_PAD_LEFT) . '-' . $lastDay[$lastPayment['month'] - 1],
+            'payment_date'  => $lastPayment['payment_date']
+        ];
+
+        return response()->json(JResponse::set(true, null, $response));
     }
 
     public function debtors() {
@@ -321,8 +328,17 @@ class MemberController extends Controller
     public function payMonth(Request $request) {
         try {
             $payment = MembersPagos::create($request->all());
+            $lastDay = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            $response = [
+                'paid_up'       => $payment['year'] . '-' . str_pad($payment['month'], 2, "0", STR_PAD_LEFT) . '-' . $lastDay[$payment['month'] - 1],
+                'payment_date'  => $payment['payment_date']
+            ];
 
-            return response()->json(JResponse::set(true, 'Pago resgistrado con éxito', $payment->toArray()));
+            $member = Member::find($request->input('member_id'));
+            $member->data->status = 'Activo';
+            $member->save();
+
+            return response()->json(JResponse::set(true, 'Pago registrado con éxito', $response));
 
         } catch(\Exception $e) {
             return response()->json(JResponse::set(false, $e->getMessage()));
