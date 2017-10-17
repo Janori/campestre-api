@@ -11,9 +11,9 @@
 |
 */
 
-/*Route::get('/', function () {
+Route::get('/', function () {
     return view('welcome');
-});*/
+});
 
 
 Route::group(['middleware' => ['cors']], function(){
@@ -31,6 +31,8 @@ Route::group(['middleware' => ['cors']], function(){
 		Route::group(['prefix'=>'guests'], function(){
 			Route::get('', 'MemberController@guests');
 			Route::get('{idmember}/hosts', 'MemberController@getHosts');
+			Route::get('{idmember}/check_visits', 'MemberController@checkVisits');
+			Route::post('{idmember}/register_visit', 'MemberController@registerVisit');
 			Route::post('{idmember}/setrel/{idref}', 'MemberController@relGuest');
 			Route::put('{idmember}/unsetrel/{idref}', 'MemberController@unrelGuest');
 		});

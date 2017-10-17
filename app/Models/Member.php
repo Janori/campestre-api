@@ -67,4 +67,8 @@ class Member extends Model{
         return $this->hasMany('App\Models\MembersHistorial', 'member_id', 'id');
     }
 
+    public function visits() {
+        return $this->hasMany('App\Visita', 'member_id', 'id');
+    }
+
 }

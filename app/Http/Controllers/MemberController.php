@@ -13,6 +13,7 @@ use App\Models\Member;
 use App\Models\MembersData;
 use App\Models\MembersRel;
 use App\Models\MembersPagos;
+use App\Visit;
 
 use Input;
 
@@ -213,6 +214,24 @@ class MemberController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id){
+        // if(is_null($id) || !is_numeric($id)) return JResponse::set(false, 'Error en la petición.');
+        // $member = Member::find($id);
+        // if(is_null($member))
+        //     return JResponse::set(false, 'El usuario seleccionado no existe');
+        //
+        // $member->fill($request->only('nombre', 'tipo'));
+        //
+        // if(is_null($member->members_data))
+        //     $member->members_data()->associate(new MembersData($request->input('data')));
+        // else
+        //     $member->members_data->fill($request->input('data'));
+        //
+        // // if(is_null($member->members_rel))
+        // //     $member->members_rel()->associate(new MembersRel($request->input('info')));
+        // // else
+        // //     $member->members_rel->fill($request->input('info'));
+        // $member->save();
+        // return JResponse::set(true, null, $member->toArray());
         $valid = ['nombre','tipo'];
         $info = null;
         $data = null;
@@ -231,7 +250,6 @@ class MemberController extends Controller
             if(!is_null($value) &&  in_array(strtolower($key), $valid))
                 $member->{$key} = $value;
         }
-
         if($info){
             if($member->members_rel == null){
                 $info = new MembersRel($info);
@@ -361,6 +379,23 @@ class MemberController extends Controller
         } catch(\Exception $e) {
             return response()->json(JResponse::set(false, $e->getMessage()));
         }
+    }
+
+    public function checkVisits($member_id) {
+        $month  = date('n');
+        $year   = date('Y');
+        $visitas = DB::table(with(new Visit)->getTable())
+                        ->whereRaw(sprintf('MONTH(date) = %s', $month))
+                        ->whereRaw(sprintf('YEAR(date) = %s', $year))
+                        ->count();
+
+        return response()->json(JResponse::set(true, null, $visitas));
+    }
+
+    public function registerVisit($member_id, Request $request) {
+        $visit = Visit::create($request->all());
+
+        return response()->json(JResponse::set(true, 'Visita registrada exitosamente'));
     }
 
 }
