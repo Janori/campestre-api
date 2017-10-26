@@ -28,15 +28,20 @@ class MemberController extends Controller
         $from = Input::get('from', 0);
         $count = Input::get('count', 10);
         $w = Input::get('query', '');
-        $member = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
+        $query = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
                 if($w != ''){
                     $query->where('nombre', 'like', '%' . $w . '%');
+                    $query->orWhereHas('members_rel', function($query) use ($w){
+                        if($w != ''){
+                            $query->where('code', $w);   
+                        }
+                    });
                     $query->where('tipo', 'T');
                 }
                       //->orWhere('', 'like', '%' . $w . '%');
-            })->take($count)->skip($from)->get()->toArray();
-
-        $q =  Member::where('tipo', '<>', 'E')->count();
+            });
+        $member = $query->take($count)->skip($from)->get()->toArray();
+        $q =  $query->count();
         return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
     public function employees(){

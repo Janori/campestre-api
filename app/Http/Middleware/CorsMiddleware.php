@@ -20,6 +20,7 @@ class CorsMiddleware
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD');
         header('Access-Control-Allow-Headers: X-Accept-Charset,Application, enctype,X-Accept,X-Requested-With,X-CSRF-TOKEN, X-XSRF-TOKEN,content-type,Content-Type,Authorization,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers');
+        header('Access-Control-Expose-Headers: RowCount');
         /*if ($request->getMethod() === "OPTIONS") {
             return $next($request);
         }*/
