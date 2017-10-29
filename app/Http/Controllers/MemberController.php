@@ -28,6 +28,7 @@ class MemberController extends Controller
         $from = Input::get('from', 0);
         $count = Input::get('count', 10);
         $w = Input::get('query', '');
+        $order = Input::get('orders', null);
         $query = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
                 if($w != ''){
                     $query->where('nombre', 'like', '%' . $w . '%');
@@ -40,8 +41,14 @@ class MemberController extends Controller
                 }
                       //->orWhere('', 'like', '%' . $w . '%');
             });
+        $q = $query->count();
+        if($order){
+            $ordrs = explode(",",$order);
+            foreach($ordrs as $o){
+                $query->orderBy($o, 'desc');
+            }
+        }
         $member = $query->take($count)->skip($from)->get()->toArray();
-        $q =  $query->count();
         return response()->json(JResponse::set(true,'[obj]', $member))->header('RowCount',$q);
     }
     public function employees(){
