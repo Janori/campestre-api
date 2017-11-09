@@ -29,15 +29,15 @@ class MemberController extends Controller
         $count = Input::get('count', 10);
         $w = Input::get('query', '');
         $order = Input::get('orders', null);
-        $query = Member::where('tipo', '<>', 'E')->where(function ($query) use ($w) {
+        $query = Member::whereIn('tipo',  ['T', 'A'])->where(function ($query) use ($w) {
                 if($w != ''){
                     $query->where('nombre', 'like', '%' . $w . '%');
                     $query->orWhereHas('members_rel', function($query) use ($w){
                         if($w != ''){
-                            $query->where('code', $w);   
+                            $query->where('code', 'like', $w . '%');
                         }
                     });
-                    $query->where('tipo', 'T');
+                    $query->whereIn('tipo', ['T', 'A']);
                 }
                       //->orWhere('', 'like', '%' . $w . '%');
             });

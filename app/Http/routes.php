@@ -20,6 +20,12 @@ Route::group(['middleware' => ['cors']], function(){
 	Route::post('authenticate', 'AuthenticateController@authenticate');
 	Route::get('users/loggedin', 'AuthenticateController@isLogged');
 	Route::get('debtors', 'MemberController@debtors');
+    Route::group(['prefix' => 'reports'], function() {
+        Route::get('active_members', 'ReportsController@activeMembers');
+        Route::get('pp_members', 'ReportsController@paymentPendingMembers');
+        Route::get('debtors_members', 'ReportsController@debtorsMembers');
+        Route::get('down_members', 'ReportsController@downMembers');
+    });
 	Route::group(['middleware' => ['jwt.auth']], function(){
 		Route::group(['prefix'=>'search'], function(){
 		});
