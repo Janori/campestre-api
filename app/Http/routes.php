@@ -26,6 +26,8 @@ Route::group(['middleware' => ['cors']], function(){
         Route::get('debtors_members', 'ReportsController@debtorsMembers');
         Route::get('down_members', 'ReportsController@downMembers');
     });
+
+    Route::resource('notifications/image/store', 'NotificationController@imageStore');
 	Route::group(['middleware' => ['jwt.auth']], function(){
 		Route::group(['prefix'=>'search'], function(){
 		});
@@ -52,5 +54,8 @@ Route::group(['middleware' => ['cors']], function(){
 		Route::get('members/{id}/historial', 'MemberController@lastPayment');
 		Route::post('members/paymonth', 'MemberController@payMonth');
 		Route::resource('members', 'MemberController');
-	});
+
+        Route::resource('notifications/image/delete', 'NotificationController@imageDelete');
+        Route::resource('notifications', 'NotificationController');
+    });
 });
