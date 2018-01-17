@@ -27,6 +27,14 @@ Route::group(['middleware' => ['cors']], function(){
         Route::get('down_members', 'ReportsController@downMembers');
     });
 
+    Route::group(['prefix' => 'v1'], function() {
+        // Route::post('login', 'ApiController@login');
+        Route::get('newsfeed', 'ApiController@newsfeed');
+        Route::get('swimming_pools', 'ApiController@pools');
+        Route::get('access_history', 'ApiController@access');
+        Route::post('change_password', 'ApiController@changePassword');
+    });
+
     Route::resource('notifications/image/store', 'NotificationController@imageStore');
 	Route::group(['middleware' => ['jwt.auth']], function(){
 		Route::group(['prefix'=>'search'], function(){
