@@ -330,25 +330,49 @@ class MemberController extends Controller
     }
 
     public function debtors() {
-        // $this->_registerMemberHistorial(); die;// This
-
         $debtors = 0;
         $members = Member::where('tipo', 'T')->get();
 
         foreach ($members as $member) {
-            if(!isset($member->members_data) || $member->members_data->status != 'ACTIVO') // IDK wihy some members doesn't have a member_data
+            if(!isset($member->members_data) || $member->members_data->status == 'DEUDOR') // IDK wihy some members doesn't have a member_data
                 continue;
 
-            $lastPayment = MembersHistorial::where('member_id', $member->id)
-                              ->orderBy('date', 'desc')
-                              ->first();
+            $lastPayment = $member->members_pagos()->orderBy('payment_date', 'desc')->first();
 
-            if($lastPayment->month != date('Y-m')) {
+            if(is_null($lastPayment)) continue;
+
+            $paidUp = date("Y-m-t", strtotime($lastPayment->payment_date));
+
+            if(strtotime($paidUp) < strtotime(date('Y-m-d'))) {
                 $debtors++;
 
-                DB::table(with(new MembersData)->getTable())
-                    ->where('id_member', $member->id)
-                    ->update(['status' => 'DEUDOR']);
+                $member->members_data->status = 'DEUDOR';
+                $member->members_data->save();
+            }
+        }
+
+        return response()->json(JResponse::set(true, "Se ha actualizado $debtors deudores"));
+    }
+
+    public function pendingPayment() {
+        $debtors = 0;
+        $members = Member::where('tipo', 'T')->get();
+
+        foreach ($members as $member) {
+            if(!isset($member->members_data) || $member->members_data->status == 'PENDIENTE DE PAGO') // IDK wihy some members doesn't have a member_data
+                continue;
+
+            $lastPayment = $member->members_pagos()->orderBy('payment_date', 'desc')->first();
+
+            if(is_null($lastPayment)) continue;
+
+            $paidUp = date("Y-m-t", strtotime($lastPayment->payment_date));
+
+            if(strtotime($paidUp) < strtotime(date('Y-m-d'))) {
+                $debtors++;
+
+                $member->member_data->status = 'DEUDOR';
+                $member->member_data->save();
             }
         }
 

@@ -71,4 +71,8 @@ class Member extends Model{
         return $this->hasMany('App\Visita', 'member_id', 'id');
     }
 
+    public function members_pagos() {
+        return $this->hasMany('App\Models\MembersPagos', 'member_id', 'id');
+    }
+
 }
